@@ -5,9 +5,8 @@ import (
 	"os"
 
 	"gin-project/config"
-	"gin-project/handlers"
-	"gin-project/middleware"
 	"gin-project/models"
+	"gin-project/routes"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -31,34 +30,8 @@ func main() {
 	// Initialize Gin router
 	router := gin.Default()
 
-	// Basic route
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Welcome to Gin + GORM + PostgreSQL API!",
-		})
-	})
-
-	// Health check route
-	router.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status":   "healthy",
-			"database": "connected",
-		})
-	})
-
-	// Authentication routes
-	authRoutes := router.Group("/auth")
-	{
-		authRoutes.POST("/register", handlers.Register)
-		authRoutes.POST("/login", handlers.Login)
-	}
-
-	// Protected routes
-	protectedRoutes := router.Group("/api")
-	protectedRoutes.Use(middleware.AuthMiddleware())
-	{
-		protectedRoutes.GET("/profile", handlers.GetProfile)
-	}
+	// Setup all routes
+	routes.SetupAllRoutes(router)
 
 	port := os.Getenv("PORT")
 	if port == "" {

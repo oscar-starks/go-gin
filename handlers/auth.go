@@ -14,7 +14,7 @@ func Register(c *gin.Context) {
 	var req models.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+			"message": err.Error(),
 		})
 		return
 	}
@@ -22,7 +22,7 @@ func Register(c *gin.Context) {
 	var existingUser models.User
 	if err := config.DB.Where("email = ?", req.Email).First(&existingUser).Error; err == nil {
 		c.JSON(http.StatusConflict, gin.H{
-			"error": "User with this email already exists",
+			"message": "User with this email already exists",
 		})
 		return
 	}
@@ -44,7 +44,7 @@ func Register(c *gin.Context) {
 
 	if err := config.DB.Create(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to create user",
+			"message": "Failed to create user",
 		})
 		return
 	}
@@ -67,7 +67,6 @@ func Register(c *gin.Context) {
 		},
 	})
 }
-
 
 func Login(c *gin.Context) {
 	var req models.LoginRequest

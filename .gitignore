@@ -65,3 +65,49 @@ tmp/
 config/local.yaml
 config/development.yaml
 config/production.yaml
+
+# Go-specific files
+go.sum.backup
+*.prof
+*.mem
+*.cpu
+coverage.txt
+coverage.out
+coverage.html
+
+# Built binaries
+main
+go-gin
+gin-project
+
+# Docker files (if using Docker later)
+docker-compose.override.yml
+
+# JWT secrets and keys
+*.key
+*.pem
+jwt_secret.txt
+
+# Database dumps and backups
+*.sql
+*.dump
+database_backup/
+migrations/data/
+
+# Local development files
+.local/
+local_config/
+dev_notes.txt
+TODO.md
+
+# Go modules cache (usually handled by Go, but just in case)
+go.mod.backup
+
+# Performance profiling
+profile.out
+mem.out
+cpu.out
+
+# Test coverage reports
+cover.html
+cover.out

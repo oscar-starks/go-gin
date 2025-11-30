@@ -60,6 +60,7 @@ dist/
 
 # Air live reload tool
 tmp/
+.air.toml.backup
 
 # Configuration files that might contain secrets
 config/local.yaml

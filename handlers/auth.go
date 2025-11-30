@@ -13,9 +13,8 @@ import (
 func Register(c *gin.Context) {
 	var req models.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
+		validationResponse := utils.FormatValidationErrors(err)
+		c.JSON(http.StatusBadRequest, validationResponse)
 		return
 	}
 
@@ -71,12 +70,10 @@ func Register(c *gin.Context) {
 func Login(c *gin.Context) {
 	var req models.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		validationResponse := utils.FormatValidationErrors(err)
+		c.JSON(http.StatusBadRequest, validationResponse)
 		return
 	}
-
 	var user models.User
 	if err := config.DB.Where("email = ?", req.Email).First(&user).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{

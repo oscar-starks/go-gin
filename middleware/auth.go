@@ -5,6 +5,8 @@ import (
 	"os"
 	"strings"
 
+	"gin-project/config"
+	"gin-project/models"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -75,6 +77,16 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		var user models.User
+		if err := config.DB.Where("id = ?", c.GetUint("userID")).First(&user).Error; err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "User not found",
+			})
+			return
+		}
+		user.Password = ""
+
+		c.Set("authUser", user)
 		c.Next()
 	}
 }

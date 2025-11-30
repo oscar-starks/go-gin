@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"gin-project/config"
@@ -109,25 +110,18 @@ func Login(c *gin.Context) {
 }
 
 func GetProfile(c *gin.Context) {
-	userID, exists := c.Get("userID")
+	user, exists := c.Get("authUser")
+
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "User not authenticated",
+		fmt.Println("authUser not found in context")
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Something went wrong",
 		})
 		return
 	}
-
-	var user models.User
-	if err := config.DB.First(&user, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "User not found",
-		})
-		return
-	}
-
-	user.Password = ""
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": user,
+		"data":    user,
+		"message": "Profile fetched successfully",
 	})
 }

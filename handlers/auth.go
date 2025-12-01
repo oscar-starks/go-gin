@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"gin-project/config"
@@ -106,22 +105,5 @@ func Login(c *gin.Context) {
 			Token: token,
 			User:  user,
 		},
-	})
-}
-
-func GetProfile(c *gin.Context) {
-	user, exists := c.Get("authUser")
-
-	if !exists {
-		fmt.Println("authUser not found in context")
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Something went wrong",
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"data":    user,
-		"message": "Profile fetched successfully",
 	})
 }

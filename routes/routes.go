@@ -9,4 +9,5 @@ func SetupAllRoutes(router *gin.Engine) {
 	SetupPublicRoutes(router)
 	SetupAuthRoutes(router)
 	SetupProtectedRoutes(router)
+	SetupChatRoutes(router)
 }

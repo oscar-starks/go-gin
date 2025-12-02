@@ -12,5 +12,8 @@ func SetupChatRoutes(router *gin.Engine) {
 	protectedRoutes.Use(middleware.AuthMiddleware())
 	{
 		protectedRoutes.GET("/has_room/", handlers.HasRoom)
+		protectedRoutes.POST("/request/:userID/", handlers.RequestChat)
+		protectedRoutes.GET("/received_requests/", handlers.ListReceivedChatRequests)
+		protectedRoutes.GET("/sent_requests/", handlers.ListSentChatRequests)
 	}
 }

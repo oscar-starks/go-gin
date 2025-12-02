@@ -21,7 +21,7 @@ func main() {
 
 	// Auto-migrate database tables
 	db := config.GetDB()
-	err := db.AutoMigrate(&models.User{})
+	err := db.AutoMigrate(&models.User{}, &models.Room{}, &models.ChatRequest{})
 
 	if err != nil {
 		log.Fatal("Failed to migrate database:", err)

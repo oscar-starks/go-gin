@@ -10,4 +10,5 @@ func SetupAllRoutes(router *gin.Engine) {
 	SetupProtectedRoutes(router)
 	SetupChatRoutes(router)
 	SetupNotificationRoutes(router)
+	SetupWebSocketRoutes(router)
 }

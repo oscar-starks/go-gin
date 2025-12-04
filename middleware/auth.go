@@ -27,6 +27,47 @@ func getJWTSecret() []byte {
 	return []byte(secret)
 }
 
+// WebSocket JWT Authentication Middleware (accepts token from query parameter)
+func WebSocketAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Get token from query parameter for WebSocket connections
+		tokenString := c.Query("token")
+		if tokenString == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Token query parameter required",
+			})
+			c.Abort()
+			return
+		}
+
+		// Parse and validate token
+		token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+			return getJWTSecret(), nil
+		})
+
+		if err != nil || !token.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Invalid or expired token",
+			})
+			c.Abort()
+			return
+		}
+
+		// Extract claims
+		if claims, ok := token.Claims.(*Claims); ok {
+			c.Set("userID", claims.UserID)
+			c.Set("email", claims.Email)
+			c.Next()
+		} else {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Invalid token claims",
+			})
+			c.Abort()
+			return
+		}
+	}
+}
+
 // JWT Authentication Middleware
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {

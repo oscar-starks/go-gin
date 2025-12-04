@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"gin-project/config"
+	"gin-project/handlers"
 	"gin-project/models"
 	"gin-project/routes"
 
@@ -18,6 +19,10 @@ func main() {
 	}
 
 	config.ConnectDB()
+	config.ConnectRedis()
+
+	// Initialize WebSocket connection manager
+	handlers.InitializeWebSocketManager()
 
 	// Auto-migrate database tables
 	db := config.GetDB()

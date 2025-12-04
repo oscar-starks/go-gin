@@ -57,3 +57,19 @@ func (cr *ChatRequest) BeforeCreate(tx *gorm.DB) error {
 type AcceptOrRejectChatRequest struct {
 	Accept bool `json:"accept"`
 }
+
+type Message struct {
+	ID        string         `json:"id" gorm:"primarykey"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+	RoomID    string         `json:"room_id" gorm:"not null;index"`
+	Room      Room           `json:"room" gorm:"foreignKey:RoomID"`
+	SenderID  uint           `json:"sender_id" gorm:"not null"`
+	Content   string         `json:"content" gorm:"type:text;not null"`
+}
+
+type RoomWithLastMessage struct {
+	Room
+	LastMessage *Message `json:"last_message"`
+}

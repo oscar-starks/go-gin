@@ -12,5 +12,6 @@ func SetupNotificationRoutes(router *gin.Engine) {
 	protectedRoutes.Use(middleware.AuthMiddleware())
 	{
 		protectedRoutes.GET("/", handlers.ListNotifications)
+		protectedRoutes.POST("/mark_read/:notificationID/", handlers.MarkNotificationAsRead)
 	}
 }

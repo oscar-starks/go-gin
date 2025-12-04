@@ -218,3 +218,40 @@ func RespondToChatRequest(c *gin.Context) {
 	})
 
 }
+
+func ListChatRooms(c *gin.Context) {
+	currentUserID := c.GetUint("userID")
+	paginationParams := utils.GetPaginationParams(c)
+
+	query := config.DB.Model(&models.Room{}).Preload("Members").Where("id IN (?)",
+		config.DB.Table("room_members").Select("room_id").Where("user_id = ?", currentUserID),
+	)
+	paginatedQuery, paginationResult := utils.Paginate(query, paginationParams)
+
+	var rooms []models.Room
+	if err := paginatedQuery.Find(&rooms).Error; err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to fetch chat rooms",
+		})
+		return
+	}
+
+	var roomsWithLastMessage []models.RoomWithLastMessage
+	for _, room := range rooms {
+		roomWithMsg := models.RoomWithLastMessage{Room: room}
+		var lastMessage models.Message
+		err := config.DB.Where("room_id = ?", room.ID).Order("created_at DESC").First(&lastMessage).Error
+		if err == nil {
+			roomWithMsg.LastMessage = &lastMessage
+		}
+
+		roomsWithLastMessage = append(roomsWithLastMessage, roomWithMsg)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":    "Chat rooms fetched successfully",
+		"data":       roomsWithLastMessage,
+		"pagination": paginationResult,
+	})
+}

@@ -35,6 +35,23 @@ func ListNotifications(c *gin.Context) {
 	})
 }
 
-func MarkNotificationAsRead() {
-	// Implementation for marking a notification as read
+func MarkNotificationAsRead(c *gin.Context) {
+	currentUserID := c.GetUint("userID")
+	notificationID := c.Param("notificationID")
+
+	var notification models.Notification
+	if err := config.DB.Where("id = ? AND user_id = ?", notificationID, currentUserID).First(&notification).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Notification not found",
+		})
+		return
+	}
+
+	notification.Read = true
+	config.DB.Save(&notification)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Notification marked as read",
+	})
+
 }

@@ -16,5 +16,6 @@ func SetupChatRoutes(router *gin.Engine) {
 		protectedRoutes.GET("/received_requests/", handlers.ListReceivedChatRequests)
 		protectedRoutes.GET("/sent_requests/", handlers.ListSentChatRequests)
 		protectedRoutes.POST("/respond_request/:requestID/", handlers.RespondToChatRequest)
+		protectedRoutes.GET("/rooms/", handlers.ListChatRooms)
 	}
 }

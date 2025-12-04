@@ -21,7 +21,7 @@ func main() {
 
 	// Auto-migrate database tables
 	db := config.GetDB()
-	err := db.AutoMigrate(&models.User{}, &models.Room{}, &models.ChatRequest{})
+	err := db.AutoMigrate(&models.User{}, &models.Room{}, &models.ChatRequest{}, &models.Notification{})
 
 	if err != nil {
 		log.Fatal("Failed to migrate database:", err)
@@ -37,6 +37,27 @@ func main() {
 	if port == "" {
 		port = "8000"
 	}
+
+	// // Clear all room_members associations first
+	// result := config.DB.Exec("DELETE FROM room_members")
+	// if result.Error != nil {
+	// 	log.Fatal("Failed to clear room members:", result.Error)
+	// }
+	// log.Printf("Cleared %d room members from the database.\n", result.RowsAffected)
+
+	// // Clear all chat requests
+	// result = config.DB.Unscoped().Delete(&models.ChatRequest{}, "1 = 1")
+	// if result.Error != nil {
+	// 	log.Fatal("Failed to clear chat requests:", result.Error)
+	// }
+	// log.Printf("Cleared %d chat requests from the database.\n", result.RowsAffected)
+
+	// // Clear all rooms
+	// result = config.DB.Unscoped().Delete(&models.Room{}, "1 = 1")
+	// if result.Error != nil {
+	// 	log.Fatal("Failed to clear rooms:", result.Error)
+	// }
+	// log.Printf("Cleared %d rooms from the database.\n", result.RowsAffected)
 
 	log.Printf("Server starting on port %s", port)
 	router.Run(":" + port)

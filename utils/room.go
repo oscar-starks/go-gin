@@ -32,10 +32,19 @@ func CreateRoomBetweenUsers(currentUserID any, targetUserID any) models.RoomCrea
 
 	existingRoom := CheckRoomExists(currentUserID, targetUserID)
 	if existingRoom.Exists {
+		// Get the actual room object
+		var room models.Room
+		if err := config.DB.Where("id = ?", existingRoom.RoomID).First(&room).Error; err != nil {
+			return models.RoomCreateResult{
+				Success: false,
+				Error:   "Failed to retrieve existing room",
+				Room:    nil,
+			}
+		}
 		return models.RoomCreateResult{
-			Success: false,
+			Success: true,
 			Error:   "Room already exists",
-			Room:    nil,
+			Room:    &room,
 		}
 	}
 

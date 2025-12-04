@@ -53,3 +53,7 @@ func (cr *ChatRequest) BeforeCreate(tx *gorm.DB) error {
 	}
 	return nil
 }
+
+type AcceptOrRejectChatRequest struct {
+	Accept bool `json:"accept"`
+}

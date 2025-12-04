@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"time"
 
 	"gorm.io/gorm"
@@ -17,14 +18,13 @@ type User struct {
 	Age       int            `json:"age"`
 }
 
-// type Product struct {
-// 	ID          uint           `json:"id" gorm:"primarykey"`
-// 	CreatedAt   time.Time      `json:"created_at"`
-// 	UpdatedAt   time.Time      `json:"updated_at"`
-// 	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
-// 	Name        string         `json:"name" gorm:"size:100;not null"`
-// 	Description string         `json:"description" gorm:"type:text"`
-// 	Price       float64        `json:"price" gorm:"type:decimal(10,2);not null"`
-// 	UserID      uint           `json:"user_id"`
-// 	User        User           `json:"user" gorm:"foreignKey:UserID"`
-// }
+type Notification struct {
+	ID        uint            `json:"id" gorm:"primarykey"`
+	CreatedAt time.Time       `json:"created_at"`
+	UpdatedAt time.Time       `json:"updated_at"`
+	DeletedAt gorm.DeletedAt  `json:"-" gorm:"index"`
+	UserID    uint            `json:"user_id" gorm:"not null;index"`
+	Message   string          `json:"message" gorm:"size:255;not null"`
+	Metadata  json.RawMessage `json:"metadata" gorm:"type:jsonb"`
+	Read      bool            `json:"read" gorm:"default:false"`
+}

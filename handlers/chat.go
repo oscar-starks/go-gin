@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -90,7 +92,7 @@ func RequestChat(c *gin.Context) {
 	}
 
 	// Preload the sender and receiver relationships
-	if err := config.DB.Preload("Sender").Preload("Receiver").First(&chat_request, chat_request.ID).Error; err != nil {
+	if err := config.DB.Preload("Sender").Preload("Receiver").Where("id = ?", chat_request.ID).First(&chat_request).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Chat request created but failed to load relationships",
 		})
@@ -149,4 +151,70 @@ func ListSentChatRequests(c *gin.Context) {
 		"data":       chatRequests,
 		"pagination": paginationResult,
 	})
+}
+
+func RespondToChatRequest(c *gin.Context) {
+	currentUserID := c.GetUint("userID")
+	chatRequestID := c.Param("requestID")
+
+	var req models.AcceptOrRejectChatRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		validationResponse := utils.FormatValidationErrors(err)
+		c.JSON(http.StatusBadRequest, validationResponse)
+		return
+	}
+
+	var chatRequest models.ChatRequest
+	if err := config.DB.Preload("Sender").Preload("Receiver").First(&chatRequest, "id = ? AND receiver_id = ?", chatRequestID, currentUserID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Chat request not found",
+		})
+		return
+	}
+
+	if chatRequest.Status != "pending" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Chat request is not pending",
+		})
+		return
+	}
+
+	log.Printf("Responding to chat request: %s with accept = %t", chatRequest.ID, req.Accept)
+
+	if !req.Accept {
+		log.Println("Rejecting chat request")
+		chatRequest.Status = "rejected"
+		chatRequest.UpdatedAt = utils.GetCurrentTimestamp()
+		config.DB.Save(&chatRequest)
+	} else {
+		log.Println("Creating room between users")
+		chatRequest.Status = "accepted"
+		chatRequest.UpdatedAt = utils.GetCurrentTimestamp()
+		config.DB.Save(&chatRequest)
+
+		// Create room between users
+		roomResult := utils.CreateRoomBetweenUsers(chatRequest.SenderID, chatRequest.ReceiverID)
+		if !roomResult.Success || roomResult.Room == nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Failed to create room after accepting chat request",
+				"error":   roomResult.Error,
+			})
+			return
+		}
+
+		// Create notification for the receiver
+		notification := models.Notification{
+			UserID:   chatRequest.SenderID,
+			Message:  fmt.Sprintf("Your chat request to %s has been accepted.", chatRequest.Receiver.Name),
+			Metadata: json.RawMessage(fmt.Sprintf(`{"room_id": "%s"}`, roomResult.Room.ID)),
+		}
+		config.DB.Create(&notification)
+		log.Printf("Notification created successfully for user: %d", notification.UserID)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("Chat request %s successfully", chatRequest.Status),
+		"data":    chatRequest,
+	})
+
 }

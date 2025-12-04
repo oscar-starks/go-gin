@@ -208,8 +208,13 @@ func RespondToChatRequest(c *gin.Context) {
 			Message:  fmt.Sprintf("Your chat request to %s has been accepted.", chatRequest.Receiver.Name),
 			Metadata: json.RawMessage(fmt.Sprintf(`{"room_id": "%s"}`, roomResult.Room.ID)),
 		}
-		config.DB.Create(&notification)
-		log.Printf("Notification created successfully for user: %d", notification.UserID)
+		if err := config.DB.Create(&notification).Error; err != nil {
+			log.Printf("Error creating notification: %v", err)
+		} else {
+			log.Printf("Notification created successfully for user: %d", notification.UserID)
+			// Send real-time notification via WebSocket
+			SendNotificationToUser(notification.UserID, notification)
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
